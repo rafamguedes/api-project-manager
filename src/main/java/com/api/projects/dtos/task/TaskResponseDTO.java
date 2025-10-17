@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -15,6 +17,8 @@ public class TaskResponseDTO {
   private String title;
   private String description;
   private Status status;
+  private LocalDateTime dueDate;
+  private LocalDateTime endDate;
   private Priority priority;
   private ProjectResponseDTO project;
 }
