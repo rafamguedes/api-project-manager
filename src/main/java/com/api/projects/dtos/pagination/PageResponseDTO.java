@@ -1,4 +1,4 @@
-package com.api.projects.dtos;
+package com.api.projects.dtos.pagination;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

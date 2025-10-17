@@ -1,7 +1,7 @@
 package com.api.projects.mappers;
 
-import com.api.projects.dtos.ProjectRequestDTO;
-import com.api.projects.dtos.ProjectResponseDTO;
+import com.api.projects.dtos.project.ProjectRequestDTO;
+import com.api.projects.dtos.project.ProjectResponseDTO;
 import com.api.projects.entities.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

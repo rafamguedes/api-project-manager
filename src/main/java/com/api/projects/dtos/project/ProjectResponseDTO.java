@@ -1,4 +1,4 @@
-package com.api.projects.dtos;
+package com.api.projects.dtos.project;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;

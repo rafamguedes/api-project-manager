@@ -1,4 +1,4 @@
-package com.api.projects.dtos;
+package com.api.projects.dtos.project;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

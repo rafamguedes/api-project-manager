@@ -1,9 +1,9 @@
 package com.api.projects.unit;
 
-import com.api.projects.dtos.PageResponseDTO;
-import com.api.projects.dtos.ProjectFilterDTO;
-import com.api.projects.dtos.ProjectRequestDTO;
-import com.api.projects.dtos.ProjectResponseDTO;
+import com.api.projects.dtos.pagination.PageResponseDTO;
+import com.api.projects.dtos.project.ProjectFilterDTO;
+import com.api.projects.dtos.project.ProjectRequestDTO;
+import com.api.projects.dtos.project.ProjectResponseDTO;
 import com.api.projects.entities.Project;
 import com.api.projects.mappers.ProjectMapper;
 import com.api.projects.repositories.ProjectRepository;

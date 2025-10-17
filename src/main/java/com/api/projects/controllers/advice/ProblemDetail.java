@@ -1,4 +1,4 @@
-package com.api.projects.exceptions;
+package com.api.projects.controllers.advice;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

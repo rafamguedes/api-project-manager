@@ -1,9 +1,9 @@
 package com.api.projects.controllers;
 
-import com.api.projects.dtos.PageResponseDTO;
-import com.api.projects.dtos.ProjectFilterDTO;
-import com.api.projects.dtos.ProjectRequestDTO;
-import com.api.projects.dtos.ProjectResponseDTO;
+import com.api.projects.dtos.pagination.PageResponseDTO;
+import com.api.projects.dtos.project.ProjectFilterDTO;
+import com.api.projects.dtos.project.ProjectRequestDTO;
+import com.api.projects.dtos.project.ProjectResponseDTO;
 import com.api.projects.services.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
