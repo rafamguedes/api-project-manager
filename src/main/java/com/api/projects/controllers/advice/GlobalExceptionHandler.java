@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,6 +23,25 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+  /**
+   * Handle authentication failures due to bad credentials.
+   *
+   * @param request the HttpServletRequest
+   * @return a ResponseEntity containing a ProblemDetail with error details
+   */
+  @ExceptionHandler(BadCredentialsException.class)
+  public ResponseEntity<ProblemDetail> handleBadCredentialsException(HttpServletRequest request) {
+
+    ProblemDetail problem =
+        new ProblemDetail(
+            "Authentication failed",
+            HttpStatus.UNAUTHORIZED.value(),
+            "Invalid username or password",
+            getRequestPath(request));
+
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
+  }
 
   /**
    * Handle validation errors for @Valid annotated request bodies.

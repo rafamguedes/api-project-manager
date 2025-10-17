@@ -1,0 +1,26 @@
+package com.api.projects.dtos.user;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class UserRequestDTO {
+
+  @NotEmpty(message = "Username must not be empty")
+  private String username;
+
+  @NotEmpty(message = "Password must not be empty")
+  @Pattern(
+      regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
+      message =
+          "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character")
+  private String password;
+
+  @NotEmpty(message = "Email must not be empty")
+  @Email(message = "Email should be valid")
+  private String email;
+}
