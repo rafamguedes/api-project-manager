@@ -8,6 +8,7 @@ import com.api.projects.entities.Project;
 import com.api.projects.mappers.ProjectMapper;
 import com.api.projects.repositories.ProjectRepository;
 import com.api.projects.services.ProjectService;
+import com.api.projects.unit.mocks.ProjectMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,40 +44,10 @@ class ProjectServiceTest {
 
   @BeforeEach
   void setUp() {
-    projectRequestDTO =
-        ProjectRequestDTO.builder()
-            .name("Test Project")
-            .description("Test Description")
-            .startDate(LocalDateTime.now())
-            .endDate(LocalDateTime.now().plusDays(30))
-            .build();
-
-    project =
-        Project.builder()
-            .id(1L)
-            .name("Test Project")
-            .description("Test Description")
-            .startDate(LocalDateTime.now())
-            .endDate(LocalDateTime.now().plusDays(30))
-            .build();
-
-    projectResponseDTO =
-        ProjectResponseDTO.builder()
-            .id(1L)
-            .name("Test Project")
-            .description("Test Description")
-            .startDate(LocalDateTime.now())
-            .endDate(LocalDateTime.now().plusDays(30))
-            .build();
-
-    savedProject =
-        Project.builder()
-            .id(1L)
-            .name("Test Project")
-            .description("Test Description")
-            .startDate(LocalDateTime.now())
-            .endDate(LocalDateTime.now().plusDays(30))
-            .build();
+    projectRequestDTO = ProjectMock.createProjectRequestDTO();
+    project = ProjectMock.createProjectEntity();
+    projectResponseDTO = ProjectMock.createProjectResponseDTO();
+    savedProject = ProjectMock.createProjectEntity();
   }
 
   @Test
