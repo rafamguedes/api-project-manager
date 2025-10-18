@@ -13,6 +13,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
@@ -24,12 +26,12 @@ public class UserService implements UserDetailsService {
       throw new BusinessException("Email already exists: " + request.getEmail());
     }
 
-    var encoder = new BCryptPasswordEncoder();
-
     var user = userMapper.toEntity(request);
-    var encryptedPassword = encoder.encode(request.getPassword());
-    user.setPassword(encryptedPassword);
-    user.setRole(Role.ROLE_USER);
+
+    user.setPassword(new BCryptPasswordEncoder().encode(request.getPassword()));
+
+    Optional.ofNullable(request.getRole())
+        .ifPresentOrElse(user::setRole, () -> user.setRole(Role.ROLE_USER));
 
     var savedUser = userRepository.save(user);
     return userMapper.toResponse(savedUser);

@@ -19,5 +19,9 @@ public class TaskResponseDTO {
   private Status status;
   private LocalDateTime dueDate;
   private Priority priority;
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
+  private String createdBy;
+  private String updatedBy;
   private ProjectResponseDTO project;
 }

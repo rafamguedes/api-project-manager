@@ -25,6 +25,10 @@ public class ProjectMock {
         .description("Project for integration testing")
         .startDate(LocalDateTime.parse("2390-10-17T18:00:00"))
         .endDate(LocalDateTime.parse("2390-10-17T18:00:00").plusDays(30))
+        .createdAt(LocalDateTime.parse("2390-10-17T18:00:00"))
+        .updatedAt(LocalDateTime.parse("2390-10-17T18:00:00").plusHours(1))
+        .createdBy("testuser")
+        .updatedBy("testuser")
         .build();
   }
 

@@ -16,6 +16,4 @@ public interface ProjectMapper {
   Project toEntity(ProjectRequestDTO projectRequestDTO);
 
   ProjectResponseDTO toResponse(Project project);
-
-  List<ProjectResponseDTO> toResponseList(List<Project> project);
 }

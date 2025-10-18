@@ -58,7 +58,11 @@ class TaskControllerTest extends BaseIntegration {
         .andExpect(jsonPath("$.status", is("TODO")))
         .andExpect(jsonPath("$.priority", is("MEDIUM")))
         .andExpect(jsonPath("$.dueDate", is("2390-10-20T09:00:00")))
-        .andExpect(jsonPath("$.project.id", is(1)));
+        .andExpect(jsonPath("$.project.id", is(1)))
+        .andExpect(jsonPath("$.createdAt", is("2390-10-10T10:00:00")))
+        .andExpect(jsonPath("$.updatedAt", is("2390-10-11T11:00:00")))
+        .andExpect(jsonPath("$.createdBy", is("testuser")))
+        .andExpect(jsonPath("$.updatedBy", is("testuser")));
 
     verify(taskService, times(1)).create(any(TaskRequestDTO.class));
   }
@@ -91,7 +95,11 @@ class TaskControllerTest extends BaseIntegration {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id", is(10)))
         .andExpect(jsonPath("$.title", is("Integration Task")))
-        .andExpect(jsonPath("$.project.id", is(1)));
+        .andExpect(jsonPath("$.project.id", is(1)))
+        .andExpect(jsonPath("$.createdAt", is("2390-10-10T10:00:00")))
+        .andExpect(jsonPath("$.updatedAt", is("2390-10-11T11:00:00")))
+        .andExpect(jsonPath("$.createdBy", is("testuser")))
+        .andExpect(jsonPath("$.updatedBy", is("testuser")));
 
     verify(taskService, times(1)).findById(10L);
   }

@@ -42,6 +42,10 @@ public class TaskMock {
         .priority(Priority.MEDIUM)
         .dueDate(LocalDateTime.parse("2390-10-20T09:00:00"))
         .project(createProjectResponseDTO())
+        .createdAt(LocalDateTime.parse("2390-10-10T10:00:00"))
+        .updatedAt(LocalDateTime.parse("2390-10-11T11:00:00"))
+        .createdBy("testuser")
+        .updatedBy("testuser")
         .build();
   }
 

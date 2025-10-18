@@ -15,4 +15,8 @@ public class ProjectResponseDTO {
   private String description;
   private LocalDateTime startDate;
   private LocalDateTime endDate;
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
+  private String createdBy;
+  private String updatedBy;
 }

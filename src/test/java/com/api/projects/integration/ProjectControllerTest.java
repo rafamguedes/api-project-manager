@@ -54,7 +54,11 @@ class ProjectControllerTest extends BaseIntegration {
         .andExpect(jsonPath("$.name", is("Integration Test Project")))
         .andExpect(jsonPath("$.description", is("Project for integration testing")))
         .andExpect(jsonPath("$.startDate", is("2390-10-17T18:00:00")))
-        .andExpect(jsonPath("$.endDate", is("2390-11-16T18:00:00")));
+        .andExpect(jsonPath("$.endDate", is("2390-11-16T18:00:00")))
+        .andExpect(jsonPath("$.createdAt", is("2390-10-17T18:00:00")))
+        .andExpect(jsonPath("$.updatedAt", is("2390-10-17T19:00:00")))
+        .andExpect(jsonPath("$.createdBy", is("testuser")))
+        .andExpect(jsonPath("$.updatedBy", is("testuser")));
 
     verify(projectService, times(1)).create(any(ProjectRequestDTO.class));
   }

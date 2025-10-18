@@ -4,6 +4,7 @@ import com.api.projects.enums.Priority;
 import com.api.projects.enums.Status;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +16,9 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -25,7 +28,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tb_tasks")
-public class Task {
+@EqualsAndHashCode(callSuper = true)
+@EntityListeners(AuditingEntityListener.class)
+public class Task extends Audit {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
