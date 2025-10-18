@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,6 +24,27 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+  /**
+   * Handle general authentication exceptions.
+   *
+   * @param ex the AuthenticationException
+   * @param request the HttpServletRequest
+   * @return a ResponseEntity containing a ProblemDetail with error details
+   */
+  @ExceptionHandler(AuthenticationException.class)
+  public ResponseEntity<ProblemDetail> handleAuthenticationException(
+      AuthenticationException ex, HttpServletRequest request) {
+
+    ProblemDetail problem =
+        new ProblemDetail(
+            "Authentication error",
+            HttpStatus.UNAUTHORIZED.value(),
+            ex.getMessage(),
+            getRequestPath(request));
+
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
+  }
 
   /**
    * Handle authentication failures due to bad credentials.

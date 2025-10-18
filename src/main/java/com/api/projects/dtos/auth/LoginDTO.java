@@ -2,9 +2,11 @@ package com.api.projects.dtos.auth;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class LoginDTO {
 
   @NotEmpty(message = "Username must not be empty")

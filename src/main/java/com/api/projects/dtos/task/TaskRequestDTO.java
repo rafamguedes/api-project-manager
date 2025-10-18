@@ -38,10 +38,6 @@ public class TaskRequestDTO {
   @Future(message = "Duo date must be in the future")
   private LocalDateTime dueDate;
 
-  @DateTimeFormat(pattern = "yyyy-MM-dd['T'HH:mm]")
-  @Future(message = "End date must be in the future")
-  private LocalDateTime endDate;
-
   @NotNull(message = "Project ID cannot be null")
   private Long projectId;
 }

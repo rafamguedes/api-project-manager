@@ -18,7 +18,6 @@ public class TaskResponseDTO {
   private String description;
   private Status status;
   private LocalDateTime dueDate;
-  private LocalDateTime endDate;
   private Priority priority;
   private ProjectResponseDTO project;
 }

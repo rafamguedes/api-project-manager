@@ -1,0 +1,232 @@
+package com.api.projects.unit;
+
+import com.api.projects.dtos.user.UserRequestDTO;
+import com.api.projects.dtos.user.UserResponseDTO;
+import com.api.projects.entities.User;
+import com.api.projects.mappers.UserMapper;
+import com.api.projects.repositories.UserRepository;
+import com.api.projects.securities.Role;
+import com.api.projects.services.UserService;
+import com.api.projects.services.exceptions.BusinessException;
+import com.api.projects.unit.mocks.UserMock;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
+
+  @Mock private UserRepository userRepository;
+
+  @Mock private UserMapper userMapper;
+
+  @InjectMocks private UserService userService;
+
+  @Test
+  @DisplayName("Should create user when request is valid")
+  void create_ShouldCreateUser_WhenValidRequest() {
+    // Arrange
+    UserRequestDTO request = UserMock.createValidUserRequestDTO();
+    User userEntity = UserMock.createUserEntityWithoutId();
+    User savedUser = UserMock.createUserEntity();
+    UserResponseDTO response = UserMock.createUserResponseDTO();
+
+    when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
+    when(userMapper.toEntity(request)).thenReturn(userEntity);
+    when(userRepository.save(any(User.class))).thenReturn(savedUser);
+    when(userMapper.toResponse(savedUser)).thenReturn(response);
+
+    // Act
+    UserResponseDTO result = userService.create(request);
+
+    // Assert
+    assertNotNull(result);
+    assertEquals(1L, result.getId());
+    assertEquals("testuser", result.getUsername());
+    assertEquals("test@example.com", result.getEmail());
+
+    verify(userRepository, times(1)).existsByEmail("test@example.com");
+    verify(userMapper, times(1)).toEntity(request);
+    verify(userRepository, times(1)).save(any(User.class));
+    verify(userMapper, times(1)).toResponse(savedUser);
+  }
+
+  @Test
+  @DisplayName("Should encrypt password when creating user")
+  void create_ShouldEncryptPassword_WhenCreatingUser() {
+    // Arrange
+    UserRequestDTO request = UserMock.createValidUserRequestDTO();
+    User userEntity = UserMock.createUserEntityWithoutId();
+    User savedUser = UserMock.createUserEntityWithEncryptedPassword();
+    UserResponseDTO response = UserMock.createUserResponseDTO();
+
+    when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
+    when(userMapper.toEntity(request)).thenReturn(userEntity);
+    when(userRepository.save(any(User.class))).thenReturn(savedUser);
+    when(userMapper.toResponse(savedUser)).thenReturn(response);
+
+    // Act
+    UserResponseDTO result = userService.create(request);
+
+    // Assert
+    assertNotNull(result);
+
+    // Verify that password was encrypted
+    verify(userRepository)
+        .save(
+            argThat(
+                user ->
+                    user.getPassword() != null
+                        && !user.getPassword().equals("@Password123")
+                        && // Password should be encrypted
+                        user.getRole() == Role.ROLE_USER));
+  }
+
+  @Test
+  @DisplayName("Should assign ROLE_USER when creating user")
+  void create_ShouldAssignUserRole_WhenCreatingUser() {
+    // Arrange
+    UserRequestDTO request = UserMock.createValidUserRequestDTO();
+    User userEntity = UserMock.createUserEntityWithoutId();
+    User savedUser = UserMock.createUserEntity();
+    UserResponseDTO response = UserMock.createUserResponseDTO();
+
+    when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
+    when(userMapper.toEntity(request)).thenReturn(userEntity);
+    when(userRepository.save(any(User.class))).thenReturn(savedUser);
+    when(userMapper.toResponse(savedUser)).thenReturn(response);
+
+    // Act
+    UserResponseDTO result = userService.create(request);
+
+    // Assert
+    assertNotNull(result);
+
+    // Verify that role was set to ROLE_USER
+    verify(userRepository).save(argThat(user -> user.getRole() == Role.ROLE_USER));
+  }
+
+  @Test
+  @DisplayName("Should throw BusinessException when email already exists")
+  void create_ShouldThrowBusinessException_WhenEmailExists() {
+    // Arrange
+    UserRequestDTO request = UserMock.createUserRequestDTOWithExistingEmail();
+
+    when(userRepository.existsByEmail(request.getEmail())).thenReturn(true);
+
+    // Act & Assert
+    BusinessException exception =
+        assertThrows(BusinessException.class, () -> userService.create(request));
+
+    assertEquals("Email already exists: exists@example.com", exception.getMessage());
+
+    verify(userRepository, times(1)).existsByEmail("exists@example.com");
+    verify(userRepository, never()).save(any());
+    verify(userMapper, never()).toEntity(any());
+    verify(userMapper, never()).toResponse(any());
+  }
+
+  @Test
+  @DisplayName("Should load user by username when user exists")
+  void loadUserByUsername_ShouldReturnUser_WhenUserExists() {
+    // Arrange
+    String username = "testuser";
+    User user = UserMock.createUserEntityForLoadByUsername(username);
+
+    when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+
+    // Act
+    UserDetails userDetails = userService.loadUserByUsername(username);
+
+    // Assert
+    assertNotNull(userDetails);
+    assertEquals(username, userDetails.getUsername());
+    assertEquals("$2a$10$encryptedPasswordHash", userDetails.getPassword());
+    assertTrue(
+        userDetails.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ROLE_USER")));
+
+    verify(userRepository, times(1)).findByUsername(username);
+  }
+
+  @Test
+  @DisplayName("Should throw UsernameNotFoundException when user does not exist")
+  void loadUserByUsername_ShouldThrowException_WhenUserNotFound() {
+    // Arrange
+    String username = "nonexistent";
+    when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+
+    // Act & Assert
+    UsernameNotFoundException exception =
+        assertThrows(
+            UsernameNotFoundException.class, () -> userService.loadUserByUsername(username));
+
+    assertEquals("nonexistent", exception.getMessage());
+    verify(userRepository, times(1)).findByUsername(username);
+  }
+
+  @Test
+  @DisplayName("Should handle different usernames in loadUserByUsername")
+  void loadUserByUsername_ShouldHandleDifferentUsernames() {
+    // Test with different usernames
+    String[] usernames = {"admin", "user123", "test.user", "john_doe"};
+
+    for (String username : usernames) {
+      // Reset mocks for each iteration
+      reset(userRepository);
+
+      User user = UserMock.createUserEntityForLoadByUsername(username);
+      when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+
+      // Act
+      UserDetails userDetails = userService.loadUserByUsername(username);
+
+      // Assert
+      assertNotNull(userDetails);
+      assertEquals(username, userDetails.getUsername());
+      verify(userRepository, times(1)).findByUsername(username);
+    }
+  }
+
+  @Test
+  @DisplayName("Should create multiple users with different data")
+  void create_ShouldHandleMultipleUsers_WithDifferentData() {
+    // Arrange
+    UserRequestDTO[] requests = UserMock.createMultipleUserRequests();
+    UserResponseDTO[] responses = UserMock.createMultipleUserResponses();
+    User[] entities = UserMock.createMultipleUserEntities();
+
+    for (int i = 0; i < requests.length; i++) {
+      // Reset mocks for each iteration
+      reset(userRepository, userMapper);
+
+      when(userRepository.existsByEmail(requests[i].getEmail())).thenReturn(false);
+      when(userMapper.toEntity(requests[i])).thenReturn(entities[i]);
+      when(userRepository.save(any(User.class))).thenReturn(entities[i]);
+      when(userMapper.toResponse(entities[i])).thenReturn(responses[i]);
+
+      // Act
+      UserResponseDTO result = userService.create(requests[i]);
+
+      // Assert
+      assertNotNull(result);
+      assertEquals(responses[i].getId(), result.getId());
+      assertEquals(responses[i].getUsername(), result.getUsername());
+      assertEquals(responses[i].getEmail(), result.getEmail());
+
+      verify(userRepository, times(1)).existsByEmail(requests[i].getEmail());
+      verify(userRepository, times(1)).save(any(User.class));
+    }
+  }
+}

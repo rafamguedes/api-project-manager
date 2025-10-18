@@ -42,13 +42,11 @@ public class Task {
   private Status status;
 
   @Column(name = "priority")
+  @Enumerated(EnumType.STRING)
   private Priority priority;
 
   @Column(name = "due_date")
   private LocalDateTime dueDate;
-
-  @Column(name = "end_date")
-  private LocalDateTime endDate;
 
   @ManyToOne
   @JoinColumn(name = "project_id")

@@ -1,23 +1,17 @@
 package com.api.projects.integration;
 
-import com.api.projects.controllers.ProjectController;
 import com.api.projects.dtos.pagination.PageResponseDTO;
 import com.api.projects.dtos.project.ProjectRequestDTO;
 import com.api.projects.dtos.project.ProjectResponseDTO;
-import com.api.projects.services.ProjectService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.api.projects.integration.mocks.ProjectMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
@@ -26,16 +20,9 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(ProjectController.class)
-class ProjectControllerIT {
+class ProjectControllerTest extends BaseIntegration {
 
-  private static final String BASE_URL = "/api/v1/projects";
-
-  @Autowired private MockMvc mockMvc;
-
-  @Autowired private ObjectMapper objectMapper;
-
-  @MockitoBean private ProjectService projectService;
+  private static final String PROJECT_BASE_URL = "/api/v1/projects";
 
   private ProjectRequestDTO projectRequestDTO;
   private ProjectResponseDTO projectResponseDTO;
@@ -43,27 +30,13 @@ class ProjectControllerIT {
 
   @BeforeEach
   void setUp() {
-    projectRequestDTO =
-        ProjectRequestDTO.builder()
-            .name("Integration Test Project")
-            .description("Project for integration testing")
-            .startDate(LocalDateTime.parse("2390-10-17T18:00:00"))
-            .endDate(LocalDateTime.parse("2390-10-17T18:00:00").plusDays(30))
-            .build();
-
-    projectResponseDTO =
-        ProjectResponseDTO.builder()
-            .id(1L)
-            .name("Integration Test Project")
-            .description("Project for integration testing")
-            .startDate(LocalDateTime.parse("2390-10-17T18:00:00"))
-            .endDate(LocalDateTime.parse("2390-10-17T18:00:00").plusDays(30))
-            .build();
-
-    pageResponseDTO = new PageResponseDTO<>(List.of(projectResponseDTO), 0, 1, 1, 10, true, true);
+    projectRequestDTO = ProjectMock.createProjectRequestDTO();
+    projectResponseDTO = ProjectMock.createProjectResponseDTO();
+    pageResponseDTO = ProjectMock.createProjectPageResponseDTO();
   }
 
   @Test
+  @WithMockUser(username = "testuser", roles = "USER")
   @DisplayName("POST /api/v1/projects - Should create project and return 201")
   void create_ShouldReturnCreatedProject_WhenValidRequest() throws Exception {
     // Arrange
@@ -72,7 +45,7 @@ class ProjectControllerIT {
     // Act & Assert
     mockMvc
         .perform(
-            post(BASE_URL)
+            post(PROJECT_BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(projectRequestDTO)))
         .andExpect(status().isCreated())
@@ -87,6 +60,7 @@ class ProjectControllerIT {
   }
 
   @Test
+  @WithMockUser(username = "testuser", roles = "USER")
   @DisplayName("POST /api/v1/projects - Should return 400 when validation fails")
   void create_ShouldReturnBadRequest_WhenInvalidRequest() throws Exception {
     // Arrange
@@ -98,7 +72,7 @@ class ProjectControllerIT {
     // Act & Assert
     mockMvc
         .perform(
-            post(BASE_URL)
+            post(PROJECT_BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidRequest)))
         .andExpect(status().isBadRequest());
@@ -107,6 +81,7 @@ class ProjectControllerIT {
   }
 
   @Test
+  @WithMockUser(username = "testuser", roles = "USER")
   @DisplayName("GET /api/v1/projects - Should return paginated projects")
   void findAllByFilter_ShouldReturnPaginatedProjects_WhenValidFilter() throws Exception {
     // Arrange
@@ -115,7 +90,7 @@ class ProjectControllerIT {
     // Act & Assert
     mockMvc
         .perform(
-            get(BASE_URL)
+            get(PROJECT_BASE_URL)
                 .param("page", "0")
                 .param("size", "10")
                 .param("sortBy", "name")
@@ -133,6 +108,7 @@ class ProjectControllerIT {
   }
 
   @Test
+  @WithMockUser(username = "testuser", roles = "USER")
   @DisplayName("GET /api/v1/projects - Should return empty page when no projects")
   void findAllByFilter_ShouldReturnEmptyPage_WhenNoProjects() throws Exception {
     // Arrange
@@ -142,7 +118,7 @@ class ProjectControllerIT {
 
     // Act & Assert
     mockMvc
-        .perform(get(BASE_URL))
+        .perform(get(PROJECT_BASE_URL))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content", hasSize(0)))
         .andExpect(jsonPath("$.totalElements", is(0)));
@@ -151,6 +127,7 @@ class ProjectControllerIT {
   }
 
   @ParameterizedTest
+  @WithMockUser(username = "testuser", roles = "USER")
   @DisplayName("GET /api/v1/projects - Should handle different filter parameters")
   @CsvSource({"0, 5, name, ASC", "1, 20, createdAt, DESC", "2, 50, id, ASC"})
   void findAllByFilter_ShouldHandleDifferentParameters(
@@ -161,7 +138,7 @@ class ProjectControllerIT {
     // Act & Assert
     mockMvc
         .perform(
-            get(BASE_URL)
+            get(PROJECT_BASE_URL)
                 .param("page", page)
                 .param("size", size)
                 .param("sortBy", sortBy)
@@ -172,13 +149,14 @@ class ProjectControllerIT {
   }
 
   @Test
+  @WithMockUser(username = "testuser", roles = "USER")
   @DisplayName("GET /api/v1/projects - Should use default values when no parameters")
   void findAllByFilter_ShouldUseDefaultValues_WhenNoParameters() throws Exception {
     // Arrange
     when(projectService.findByFilter(any())).thenReturn(pageResponseDTO);
 
     // Act & Assert
-    mockMvc.perform(get(BASE_URL)).andExpect(status().isOk());
+    mockMvc.perform(get(PROJECT_BASE_URL)).andExpect(status().isOk());
 
     verify(projectService, times(1)).findByFilter(any());
   }
