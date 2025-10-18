@@ -4,6 +4,7 @@ import com.api.projects.dtos.pagination.PageResponseDTO;
 import com.api.projects.dtos.project.ProjectFilterDTO;
 import com.api.projects.dtos.project.ProjectRequestDTO;
 import com.api.projects.dtos.project.ProjectResponseDTO;
+import com.api.projects.dtos.project.ProjectUpdateRequestDTO;
 import com.api.projects.entities.Project;
 import com.api.projects.mappers.ProjectMapper;
 import com.api.projects.repositories.ProjectRepository;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,6 +43,7 @@ class ProjectServiceTest {
   private Project project;
   private ProjectResponseDTO projectResponseDTO;
   private Project savedProject;
+  private ProjectUpdateRequestDTO projectUpdateRequestDTO;
 
   @BeforeEach
   void setUp() {
@@ -48,6 +51,7 @@ class ProjectServiceTest {
     project = ProjectMock.createProjectEntity();
     projectResponseDTO = ProjectMock.createProjectResponseDTO();
     savedProject = ProjectMock.createProjectEntity();
+    projectUpdateRequestDTO = ProjectMock.createProjectUpdateRequestDTO();
   }
 
   @Test
@@ -149,5 +153,132 @@ class ProjectServiceTest {
     // Assert
     assertNotNull(result);
     verify(projectRepository, times(1)).findAll(expectedPageable);
+  }
+
+  @Test
+  @DisplayName("Should return project by ID")
+  void findById_ShouldReturnProjectById_WhenProjectExists() {
+    // Arrange
+    Long projectId = 1L;
+    when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(project));
+    when(projectMapper.toResponse(project)).thenReturn(projectResponseDTO);
+
+    // Act
+    ProjectResponseDTO result = projectService.findById(projectId);
+
+    // Assert
+    assertNotNull(result);
+    assertEquals(projectResponseDTO.getId(), result.getId());
+    assertEquals(projectResponseDTO.getName(), result.getName());
+    assertEquals(projectResponseDTO.getDescription(), result.getDescription());
+
+    verify(projectRepository, times(1)).findById(projectId);
+    verify(projectMapper, times(1)).toResponse(project);
+  }
+
+  @Test
+  @DisplayName("Should throw NotFoundException when project does not exist")
+  void findById_ShouldThrowNotFoundException_WhenProjectDoesNotExist() {
+    // Arrange
+    Long projectId = 1L;
+    when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.empty());
+
+    // Act & Assert
+    Exception exception =
+        assertThrows(RuntimeException.class, () -> projectService.findById(projectId));
+
+    String expectedMessage = "Project not found with id: " + projectId;
+    String actualMessage = exception.getMessage();
+
+    assertTrue(actualMessage.contains(expectedMessage));
+
+    verify(projectRepository, times(1)).findById(projectId);
+    verify(projectMapper, never()).toResponse(any(Project.class));
+  }
+
+  @Test
+  @DisplayName("Should update project successfully")
+  void updateProject_ShouldUpdateProject_WhenValidRequest() {
+    // Arrange
+    Long projectId = 1L;
+    when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+    when(projectRepository.save(any(Project.class))).thenReturn(project);
+
+    // Act
+    assertDoesNotThrow(() -> projectService.updateProject(projectId, projectUpdateRequestDTO));
+
+    // Assert
+    verify(projectRepository, times(1)).findById(projectId);
+    verify(projectRepository, times(1)).save(any(Project.class));
+  }
+
+  @Test
+  @DisplayName("Should throw NotFoundException when updating non-existing project")
+  void updateProject_ShouldThrowNotFoundException_WhenProjectDoesNotExist() {
+    // Arrange
+    Long projectId = 1L;
+    when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
+
+    // Act & Assert
+    Exception exception =
+        assertThrows(
+            RuntimeException.class,
+            () -> projectService.updateProject(projectId, projectUpdateRequestDTO));
+
+    String expectedMessage = "Project not found with id: " + projectId;
+    String actualMessage = exception.getMessage();
+
+    assertTrue(actualMessage.contains(expectedMessage));
+
+    verify(projectRepository, times(1)).findById(projectId);
+    verify(projectRepository, never()).save(any(Project.class));
+  }
+
+  @Test
+  @DisplayName("Should delete project by ID")
+  void deleteProjectById_ShouldDeleteProject_WhenProjectExists() {
+    // Arrange
+    Long projectId = 1L;
+    when(projectRepository.existsById(projectId)).thenReturn(true);
+    doNothing().when(projectRepository).deleteById(projectId);
+
+    // Act
+    assertDoesNotThrow(() -> projectService.deleteProjectById(projectId));
+
+    // Assert
+    verify(projectRepository, times(1)).existsById(projectId);
+    verify(projectRepository, times(1)).deleteById(projectId);
+  }
+
+  @Test
+  @DisplayName("Should throw NotFoundException when deleting non-existing project")
+  void deleteProjectById_ShouldThrowNotFoundException_WhenProjectDoesNotExist() {
+    // Arrange
+    Long projectId = 1L;
+    when(projectRepository.existsById(projectId)).thenReturn(false);
+
+    // Act & Assert
+    Exception exception =
+        assertThrows(RuntimeException.class, () -> projectService.deleteProjectById(projectId));
+    String expectedMessage = "Project not found with id: " + projectId;
+    String actualMessage = exception.getMessage();
+    assertTrue(actualMessage.contains(expectedMessage));
+    verify(projectRepository, times(1)).existsById(projectId);
+    verify(projectRepository, never()).deleteById(projectId);
+  }
+
+  @Test
+  @DisplayName("Should delete multiple projects by IDs")
+  void deleteProjectsByIds_ShouldDeleteMultipleProjects_WhenProjectsExist() {
+    // Arrange
+    List<Long> projectIds = List.of(1L, 2L, 3L);
+
+    doNothing().when(projectRepository).deleteAllByIdInBatch(projectIds);
+
+    // Act
+    assertDoesNotThrow(() -> projectService.deleteProjectsByIds(projectIds));
+
+    // Assert
+    verify(projectRepository, times(1)).deleteAllByIdInBatch(projectIds);
   }
 }

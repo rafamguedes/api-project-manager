@@ -2,6 +2,7 @@ package com.api.projects.unit.mocks;
 
 import com.api.projects.dtos.project.ProjectRequestDTO;
 import com.api.projects.dtos.project.ProjectResponseDTO;
+import com.api.projects.dtos.project.ProjectUpdateRequestDTO;
 import com.api.projects.entities.Project;
 
 import java.time.LocalDateTime;
@@ -37,6 +38,16 @@ public class ProjectMock {
         .description("Test Description")
         .startDate(LocalDateTime.now())
         .endDate(LocalDateTime.now().plusDays(30))
+        .build();
+  }
+
+  // ProjectUpdateRequestDTO Mocks
+  public static ProjectUpdateRequestDTO createProjectUpdateRequestDTO() {
+    return ProjectUpdateRequestDTO.builder()
+        .name("Updated Test Project")
+        .description("Updated Test Description")
+        .startDate(LocalDateTime.now().plusDays(1))
+        .endDate(LocalDateTime.now().plusDays(31))
         .build();
   }
 }
