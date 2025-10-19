@@ -33,7 +33,7 @@ public class UserService implements UserDetailsService {
             .username(request.getUsername().trim().replaceAll("\\s+", " "))
             .email(request.getEmail())
             .password(new BCryptPasswordEncoder().encode(request.getPassword()))
-            .role(request.getRole() != null ? request.getRole() : Role.ROLE_USER)
+            .role(Role.ROLE_USER)
             .build();
 
     var savedUser = userRepository.save(user);

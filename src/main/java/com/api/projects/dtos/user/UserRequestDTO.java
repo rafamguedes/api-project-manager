@@ -1,7 +1,5 @@
 package com.api.projects.dtos.user;
 
-import com.api.projects.securities.Role;
-import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -27,7 +25,4 @@ public class UserRequestDTO {
   @NotEmpty(message = "Email must not be empty")
   @Email(message = "Email should be valid")
   private String email;
-
-  @ApiModelProperty(value = "Role of the user", allowableValues = "ROLE_ADMIN,ROLE_USER")
-  private Role role;
 }
