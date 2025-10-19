@@ -18,12 +18,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
 
   private final JwtFilter jwtFilter;
   private final CorsConfig corsConfig;
+  private final CustomAccessDeniedHandler customAccessDeniedHandler;
+  private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -38,16 +40,27 @@ public class SecurityConfig {
                     // Public endpoints
                     .requestMatchers(HttpMethod.POST, "/api/v1/users", "/api/v1/auth/login")
                     .permitAll()
-                    // Swagger/OpenAPI endpoints
-                    .requestMatchers(
-                        "/swagger-ui/**",
-                        "/swagger-ui.html",
-                        "/v3/api-docs/**",
-                        "/swagger-resources/**",
-                        "/webjars/**")
+                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/webjars/**")
                     .permitAll()
+
+                    // ADMIN only operations
+                    .requestMatchers(HttpMethod.PUT, "/api/v1/projects/**")
+                    .hasAuthority("ROLE_ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/api/v1/projects/**")
+                    .hasAuthority("ROLE_ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/api/v1/projects/delete-by-ids")
+                    .hasAuthority("ROLE_ADMIN")
+
+                    // All project and task endpoints require USER or ADMIN role
+                    .requestMatchers("/api/v1/projects/**", "/api/v1/tasks/**")
+                    .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                     .anyRequest()
                     .authenticated())
+        .exceptionHandling(
+            exception ->
+                exception
+                    .accessDeniedHandler(customAccessDeniedHandler)
+                    .authenticationEntryPoint(customAuthenticationEntryPoint))
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
   }

@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,6 +36,7 @@ public class TaskController {
   private final TaskService taskService;
 
   @PostMapping
+  @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(summary = "Create Task", description = "Create a new task")
   @ApiResponses(
       value = {
@@ -49,6 +51,7 @@ public class TaskController {
   }
 
   @GetMapping("/{id}")
+  @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(summary = "Get Task by ID", description = "Retrieve a task by its ID")
   @ApiResponses(
       value = {
@@ -62,6 +65,7 @@ public class TaskController {
   }
 
   @GetMapping
+  @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(
       summary = "Get Tasks with Filtering",
       description = "Retrieve a paginated list of tasks with optional filtering")
@@ -77,6 +81,7 @@ public class TaskController {
   }
 
   @PutMapping("/{id}/status")
+  @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(summary = "Update Task Status", description = "Update the status of a task by its ID")
   @ApiResponses(
       value = {
@@ -92,6 +97,7 @@ public class TaskController {
   }
 
   @PutMapping("/{id}/priority")
+  @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(
       summary = "Update Task Priority",
       description = "Update the priority of a task by its ID")
@@ -109,6 +115,7 @@ public class TaskController {
   }
 
   @DeleteMapping("/{id}")
+  @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(summary = "Delete Task", description = "Delete a task by its ID")
   @ApiResponses(
       value = {

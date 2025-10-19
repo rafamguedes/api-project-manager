@@ -36,12 +36,13 @@ public class ProjectController {
   private final ProjectService projectService;
 
   @PostMapping
+  @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(summary = "Create Project", description = "Create a new project")
   @ApiResponses(
       value = {
         @ApiResponse(responseCode = "201", description = "Project created successfully"),
         @ApiResponse(responseCode = "400", description = "Invalid request"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized")
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
       })
   public ResponseEntity<ProjectResponseDTO> createProject(
       @Valid @RequestBody ProjectRequestDTO request) {
@@ -50,6 +51,7 @@ public class ProjectController {
   }
 
   @GetMapping
+  @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(
       summary = "List Projects",
       description = "Retrieve a paginated list of projects with optional filtering")
@@ -65,6 +67,7 @@ public class ProjectController {
   }
 
   @GetMapping("/{id}")
+  @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(summary = "Get Project by ID", description = "Retrieve a project by its ID")
   @ApiResponses(
       value = {
@@ -78,7 +81,7 @@ public class ProjectController {
   }
 
   @PutMapping("/{id}")
-  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @PreAuthorize("hasAuthority('ROLE_ADMIN')")
   @Operation(summary = "Update Project", description = "Update an existing project by ID")
   @ApiResponses(
       value = {
@@ -95,7 +98,7 @@ public class ProjectController {
   }
 
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @PreAuthorize("hasAuthority('ROLE_ADMIN')")
   @Operation(summary = "Delete Project by ID", description = "Delete a project by its ID")
   @ApiResponses(
       value = {
@@ -110,7 +113,7 @@ public class ProjectController {
   }
 
   @PostMapping("/delete-by-ids")
-  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @PreAuthorize("hasAuthority('ROLE_ADMIN')")
   @Operation(
       summary = "Delete Projects by IDs",
       description = "Delete multiple projects by their IDs")
