@@ -1,6 +1,7 @@
 package com.api.projects.controllers.advice;
 
 import com.api.projects.exceptions.BusinessException;
+import com.api.projects.exceptions.ConflictException;
 import com.api.projects.exceptions.NotFoundException;
 import com.api.projects.exceptions.RateLimitExceededException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -142,6 +143,20 @@ public class GlobalExceptionHandler {
             getRequestPath(request));
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+  }
+
+  @ExceptionHandler(ConflictException.class)
+  public ResponseEntity<ProblemDetail> handleConflictException(
+      ConflictException ex, HttpServletRequest request) {
+
+    ProblemDetail problem =
+        new ProblemDetail(
+            "Conflict error",
+            HttpStatus.CONFLICT.value(),
+            ex.getMessage(),
+            getRequestPath(request));
+
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
   }
 
   @ExceptionHandler(RateLimitExceededException.class)

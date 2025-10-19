@@ -18,12 +18,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 @Tag(name = "Authentication", description = "Endpoints for user authentication")
 public class AuthController {
+
   private final AuthService authService;
 
   @PostMapping("/login")
-  @Operation(summary = "User Login", description = "Authenticates a user and returns a JWT token")
+  @Operation(
+      summary = "User Login",
+      description = "Authenticates a user and returns a JWT token. This is a public endpoint.")
   public ResponseEntity<TokenDTO> login(@Valid @RequestBody LoginDTO login) {
     TokenDTO token = authService.authenticate(login);
-    return ResponseEntity.ok().body(token);
+    return ResponseEntity.ok(token);
   }
 }

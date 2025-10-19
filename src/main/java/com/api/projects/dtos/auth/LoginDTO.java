@@ -2,6 +2,7 @@ package com.api.projects.dtos.auth;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,6 +11,7 @@ import lombok.Data;
 public class LoginDTO {
 
   @NotEmpty(message = "Username must not be empty")
+  @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
   private String username;
 
   @NotEmpty(message = "Password must not be empty")

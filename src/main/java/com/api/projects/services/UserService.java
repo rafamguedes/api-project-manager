@@ -3,10 +3,10 @@ package com.api.projects.services;
 import com.api.projects.dtos.user.UserRequestDTO;
 import com.api.projects.dtos.user.UserResponseDTO;
 import com.api.projects.entities.User;
+import com.api.projects.exceptions.ConflictException;
 import com.api.projects.mappers.UserMapper;
 import com.api.projects.repositories.UserRepository;
 import com.api.projects.securities.Role;
-import com.api.projects.exceptions.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -33,7 +33,7 @@ public class UserService implements UserDetailsService {
             .username(request.getUsername().trim().replaceAll("\\s+", " "))
             .email(request.getEmail())
             .password(new BCryptPasswordEncoder().encode(request.getPassword()))
-            .role(request.getRole() != null ? request.getRole() : Role.ROLE_USER)
+            .role(Role.ROLE_USER)
             .build();
 
     var savedUser = userRepository.save(user);
@@ -42,11 +42,11 @@ public class UserService implements UserDetailsService {
 
   private void validateUserRules(UserRequestDTO request) {
     if (userRepository.existsByUsername(request.getUsername())) {
-      throw new BusinessException(USERNAME_ALREADY_EXISTS_MESSAGE);
+      throw new ConflictException(USERNAME_ALREADY_EXISTS_MESSAGE);
     }
 
     if (userRepository.existsByEmail(request.getEmail())) {
-      throw new BusinessException(EMAIL_ALREADY_EXISTS_MESSAGE);
+      throw new ConflictException(EMAIL_ALREADY_EXISTS_MESSAGE);
     }
   }
 

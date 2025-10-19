@@ -8,28 +8,26 @@ import com.api.projects.dtos.task.TaskResponseDTO;
 import com.api.projects.dtos.task.TaskStatusUpdateDTO;
 import com.api.projects.services.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/tasks")
 @Tag(name = "Tasks", description = "Endpoints for managing tasks")
+@SecurityRequirement(name = "bearerAuth")
 public class TaskController {
+
   private final TaskService taskService;
 
   @PostMapping
+  @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(summary = "Create Task", description = "Create a new task")
   public ResponseEntity<TaskResponseDTO> createTask(@Valid @RequestBody TaskRequestDTO request) {
     TaskResponseDTO response = taskService.create(request);
@@ -37,6 +35,7 @@ public class TaskController {
   }
 
   @GetMapping("/{id}")
+  @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(summary = "Get Task by ID", description = "Retrieve a task by its ID")
   public ResponseEntity<TaskResponseDTO> getTaskById(@PathVariable Long id) {
     TaskResponseDTO response = taskService.findById(id);
@@ -44,6 +43,7 @@ public class TaskController {
   }
 
   @GetMapping
+  @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(
       summary = "Get Tasks with Filtering",
       description = "Retrieve a paginated list of tasks with optional filtering")
@@ -53,6 +53,7 @@ public class TaskController {
   }
 
   @PutMapping("/{id}/status")
+  @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(summary = "Update Task Status", description = "Update the status of a task by its ID")
   public ResponseEntity<Void> updateTaskStatus(
       @PathVariable Long id, @Valid @RequestBody TaskStatusUpdateDTO request) {
@@ -61,6 +62,7 @@ public class TaskController {
   }
 
   @PutMapping("/{id}/priority")
+  @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(
       summary = "Update Task Priority",
       description = "Update the priority of a task by its ID")
@@ -71,6 +73,7 @@ public class TaskController {
   }
 
   @DeleteMapping("/{id}")
+  @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(summary = "Delete Task", description = "Delete a task by its ID")
   public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
     taskService.delete(id);

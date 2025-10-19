@@ -19,10 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/users")
 @Tag(name = "Users", description = "Endpoints for user management")
 public class UserController {
+
   private final UserService userService;
 
   @PostMapping
-  @Operation(summary = "Create User", description = "Creates a new user in the system")
+  @Operation(
+      summary = "Create User",
+      description = "Creates a new user in the system (public endpoint)")
   public ResponseEntity<UserResponseDTO> create(@Valid @RequestBody UserRequestDTO request) {
     UserResponseDTO response = userService.create(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
