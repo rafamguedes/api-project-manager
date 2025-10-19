@@ -10,13 +10,13 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: create
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
         jdbc:
           lob:
-            non_contextual_creation: true
+            non_contextual_creation: false
   security:
     token:
       secret: secret-jwt-token-key

@@ -1,4 +1,4 @@
-package com.api.projects.services.exceptions;
+package com.api.projects.exceptions;
 
 public class NotFoundException extends RuntimeException {
   public NotFoundException(String message) {

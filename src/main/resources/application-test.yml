@@ -4,13 +4,13 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
   sql:
     init:
       mode: always
   security:
     token:
-      secret: test-secret-key-1234567890-for-testing-only
+      secret: secret-jwt-token-key-test

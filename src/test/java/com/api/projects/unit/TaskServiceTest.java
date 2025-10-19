@@ -14,7 +14,7 @@ import com.api.projects.mappers.TaskMapper;
 import com.api.projects.repositories.ProjectRepository;
 import com.api.projects.repositories.TaskRepository;
 import com.api.projects.services.TaskService;
-import com.api.projects.services.exceptions.NotFoundException;
+import com.api.projects.exceptions.NotFoundException;
 import com.api.projects.unit.mocks.TaskMock;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

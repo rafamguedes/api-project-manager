@@ -1,7 +1,8 @@
 package com.api.projects.controllers.advice;
 
-import com.api.projects.services.exceptions.BusinessException;
-import com.api.projects.services.exceptions.NotFoundException;
+import com.api.projects.exceptions.BusinessException;
+import com.api.projects.exceptions.NotFoundException;
+import com.api.projects.exceptions.RateLimitExceededException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,13 +26,6 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  /**
-   * Handle general authentication exceptions.
-   *
-   * @param ex the AuthenticationException
-   * @param request the HttpServletRequest
-   * @return a ResponseEntity containing a ProblemDetail with error details
-   */
   @ExceptionHandler(AuthenticationException.class)
   public ResponseEntity<ProblemDetail> handleAuthenticationException(
       AuthenticationException ex, HttpServletRequest request) {
@@ -46,12 +40,6 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
   }
 
-  /**
-   * Handle authentication failures due to bad credentials.
-   *
-   * @param request the HttpServletRequest
-   * @return a ResponseEntity containing a ProblemDetail with error details
-   */
   @ExceptionHandler(BadCredentialsException.class)
   public ResponseEntity<ProblemDetail> handleBadCredentialsException(HttpServletRequest request) {
 
@@ -65,13 +53,6 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
   }
 
-  /**
-   * Handle validation errors for @Valid annotated request bodies.
-   *
-   * @param ex the MethodArgumentNotValidException
-   * @param request the HttpServletRequest
-   * @return a ResponseEntity containing a ProblemDetail with validation error details
-   */
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ProblemDetail> handleMethodArgumentNotValid(
       MethodArgumentNotValidException ex, HttpServletRequest request) {
@@ -97,13 +78,6 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
   }
 
-  /**
-   * Handle type mismatch errors for request parameters.
-   *
-   * @param ex the MethodArgumentTypeMismatchException
-   * @param request the HttpServletRequest
-   * @return a ResponseEntity containing a ProblemDetail with error details
-   */
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public ResponseEntity<ProblemDetail> handleMethodArgumentTypeMismatch(
       MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
@@ -122,13 +96,6 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
   }
 
-  /**
-   * Handle malformed JSON requests, including invalid date formats.
-   *
-   * @param ex the HttpMessageNotReadableException
-   * @param request the HttpServletRequest
-   * @return a ResponseEntity containing a ProblemDetail with error details
-   */
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<ProblemDetail> handleHttpMessageNotReadable(
       HttpMessageNotReadableException ex, HttpServletRequest request) {
@@ -149,13 +116,6 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
   }
 
-  /**
-   * Handle entity not found exceptions.
-   *
-   * @param ex the NotFoundException
-   * @param request the HttpServletRequest
-   * @return a ResponseEntity containing a ProblemDetail with error details
-   */
   @ExceptionHandler(NotFoundException.class)
   public ResponseEntity<ProblemDetail> handleEntityNotFound(
       NotFoundException ex, HttpServletRequest request) {
@@ -170,13 +130,6 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
   }
 
-  /**
-   * Handle custom business exceptions.
-   *
-   * @param ex the BusinessException
-   * @param request the HttpServletRequest
-   * @return a ResponseEntity containing a ProblemDetail with error details
-   */
   @ExceptionHandler(BusinessException.class)
   public ResponseEntity<ProblemDetail> handleBusinessException(
       BusinessException ex, HttpServletRequest request) {
@@ -191,18 +144,26 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
   }
 
-  /**
-   * Handle all other uncaught exceptions.
-   *
-   * @param ex the Exception
-   * @param request the HttpServletRequest
-   * @return a ResponseEntity containing a ProblemDetail with error details
-   */
-  @ExceptionHandler(Exception.class)
-  public ResponseEntity<ProblemDetail> handleGenericException(
-      Exception ex, HttpServletRequest request) {
+  @ExceptionHandler(RateLimitExceededException.class)
+  public ResponseEntity<ProblemDetail> handleRateLimitExceeded(
+      RateLimitExceededException ex, HttpServletRequest request) {
 
-    log.error("Internal server error: ", ex);
+    ProblemDetail problem =
+        new ProblemDetail(
+            "Rate limit exceeded",
+            HttpStatus.TOO_MANY_REQUESTS.value(),
+            ex.getMessage(),
+            getRequestPath(request));
+
+    problem.setProperty("retryAfterSeconds", ex.getRetryAfterSeconds());
+
+    return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+        .header("X-Rate-Limit-Retry-After-Seconds", String.valueOf(ex.getRetryAfterSeconds()))
+        .body(problem);
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<ProblemDetail> handleGenericException(HttpServletRequest request) {
 
     ProblemDetail problem =
         new ProblemDetail(
@@ -214,12 +175,6 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problem);
   }
 
-  /**
-   * Extract the request path from the HttpServletRequest.
-   *
-   * @param request the HttpServletRequest
-   * @return the request URI
-   */
   private String getRequestPath(HttpServletRequest request) {
     return request.getRequestURI();
   }

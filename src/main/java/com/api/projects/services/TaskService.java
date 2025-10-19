@@ -11,7 +11,7 @@ import com.api.projects.entities.Task;
 import com.api.projects.mappers.TaskMapper;
 import com.api.projects.repositories.ProjectRepository;
 import com.api.projects.repositories.TaskRepository;
-import com.api.projects.services.exceptions.NotFoundException;
+import com.api.projects.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

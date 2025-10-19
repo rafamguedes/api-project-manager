@@ -7,7 +7,7 @@ import com.api.projects.mappers.UserMapper;
 import com.api.projects.repositories.UserRepository;
 import com.api.projects.securities.Role;
 import com.api.projects.services.UserService;
-import com.api.projects.services.exceptions.BusinessException;
+import com.api.projects.exceptions.BusinessException;
 import com.api.projects.unit.mocks.UserMock;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

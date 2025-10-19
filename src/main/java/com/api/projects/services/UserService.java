@@ -6,15 +6,13 @@ import com.api.projects.entities.User;
 import com.api.projects.mappers.UserMapper;
 import com.api.projects.repositories.UserRepository;
 import com.api.projects.securities.Role;
-import com.api.projects.services.exceptions.BusinessException;
+import com.api.projects.exceptions.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
