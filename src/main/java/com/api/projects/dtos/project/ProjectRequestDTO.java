@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ProjectRequestDTO {
   @NotEmpty(message = "Name cannot be empty")
+  @Size(max = 100, message = "Name cannot exceed 100 characters")
   private String name;
 
   @Size(max = 500, message = "Description cannot exceed 500 characters")
