@@ -19,4 +19,4 @@ spring:
             non_contextual_creation: true
   security:
     token:
-      secret: mysecretkeytoken1234567890
+      secret: secret-jwt-token-key

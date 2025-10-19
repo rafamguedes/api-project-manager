@@ -29,7 +29,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/projects_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: root
-      SECURITY_TOKEN_SECRET: your-secret-token-key
+      SECURITY_TOKEN_SECRET: secret-jwt-token-key
     ports:
       - "8080:8080"
     depends_on:
