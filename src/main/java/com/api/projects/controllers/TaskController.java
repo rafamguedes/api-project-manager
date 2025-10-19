@@ -8,8 +8,6 @@ import com.api.projects.dtos.task.TaskResponseDTO;
 import com.api.projects.dtos.task.TaskStatusUpdateDTO;
 import com.api.projects.services.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -17,14 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,13 +29,6 @@ public class TaskController {
   @PostMapping
   @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(summary = "Create Task", description = "Create a new task")
-  @ApiResponses(
-      value = {
-        @ApiResponse(responseCode = "201", description = "Task created successfully"),
-        @ApiResponse(responseCode = "400", description = "Invalid request"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-        @ApiResponse(responseCode = "404", description = "Project not found")
-      })
   public ResponseEntity<TaskResponseDTO> createTask(@Valid @RequestBody TaskRequestDTO request) {
     TaskResponseDTO response = taskService.create(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -53,12 +37,6 @@ public class TaskController {
   @GetMapping("/{id}")
   @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(summary = "Get Task by ID", description = "Retrieve a task by its ID")
-  @ApiResponses(
-      value = {
-        @ApiResponse(responseCode = "200", description = "Task found"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-        @ApiResponse(responseCode = "404", description = "Task not found")
-      })
   public ResponseEntity<TaskResponseDTO> getTaskById(@PathVariable Long id) {
     TaskResponseDTO response = taskService.findById(id);
     return ResponseEntity.ok(response);
@@ -69,12 +47,6 @@ public class TaskController {
   @Operation(
       summary = "Get Tasks with Filtering",
       description = "Retrieve a paginated list of tasks with optional filtering")
-  @ApiResponses(
-      value = {
-        @ApiResponse(responseCode = "200", description = "Tasks retrieved successfully"),
-        @ApiResponse(responseCode = "400", description = "Invalid filter parameters"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized")
-      })
   public ResponseEntity<PageResponseDTO<TaskResponseDTO>> getTasks(@Valid TaskFilterDTO filter) {
     PageResponseDTO<TaskResponseDTO> response = taskService.findByFilter(filter);
     return ResponseEntity.ok(response);
@@ -83,13 +55,6 @@ public class TaskController {
   @PutMapping("/{id}/status")
   @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(summary = "Update Task Status", description = "Update the status of a task by its ID")
-  @ApiResponses(
-      value = {
-        @ApiResponse(responseCode = "204", description = "Task status updated successfully"),
-        @ApiResponse(responseCode = "400", description = "Invalid status or request"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-        @ApiResponse(responseCode = "404", description = "Task not found")
-      })
   public ResponseEntity<Void> updateTaskStatus(
       @PathVariable Long id, @Valid @RequestBody TaskStatusUpdateDTO request) {
     taskService.updateStatus(id, request);
@@ -101,13 +66,6 @@ public class TaskController {
   @Operation(
       summary = "Update Task Priority",
       description = "Update the priority of a task by its ID")
-  @ApiResponses(
-      value = {
-        @ApiResponse(responseCode = "204", description = "Task priority updated successfully"),
-        @ApiResponse(responseCode = "400", description = "Invalid priority or request"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-        @ApiResponse(responseCode = "404", description = "Task not found")
-      })
   public ResponseEntity<Void> updateTaskPriority(
       @PathVariable Long id, @Valid @RequestBody TaskPriorityUpdateDTO request) {
     taskService.updatePriority(id, request);
@@ -117,12 +75,6 @@ public class TaskController {
   @DeleteMapping("/{id}")
   @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
   @Operation(summary = "Delete Task", description = "Delete a task by its ID")
-  @ApiResponses(
-      value = {
-        @ApiResponse(responseCode = "204", description = "Task deleted successfully"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-        @ApiResponse(responseCode = "404", description = "Task not found")
-      })
   public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
     taskService.delete(id);
     return ResponseEntity.noContent().build();

@@ -4,8 +4,6 @@ import com.api.projects.dtos.auth.LoginDTO;
 import com.api.projects.dtos.auth.TokenDTO;
 import com.api.projects.services.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,15 +22,11 @@ public class AuthController {
   private final AuthService authService;
 
   @PostMapping("/login")
-  @Operation(summary = "User Login", description = "Authenticates a user and returns a JWT token")
-  @ApiResponses(
-      value = {
-        @ApiResponse(responseCode = "200", description = "Authentication successful"),
-        @ApiResponse(responseCode = "400", description = "Invalid request or missing credentials"),
-        @ApiResponse(responseCode = "401", description = "Invalid username or password")
-      })
+  @Operation(
+      summary = "User Login",
+      description = "Authenticates a user and returns a JWT token. This is a public endpoint.")
   public ResponseEntity<TokenDTO> login(@Valid @RequestBody LoginDTO login) {
     TokenDTO token = authService.authenticate(login);
-    return ResponseEntity.ok().body(token);
+    return ResponseEntity.ok(token);
   }
 }
