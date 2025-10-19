@@ -9,9 +9,10 @@ spring:
       hibernate:
         format_sql: false
 
+rate-limit:
+  requests: 40
+  duration: 60
+
 cors:
   allowed-origins: http://localhost:5173
   allow-credentials: true
-
-rate-limit:
-  enabled: false

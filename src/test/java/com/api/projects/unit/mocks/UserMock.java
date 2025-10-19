@@ -62,15 +62,6 @@ public class UserMock {
         .build();
   }
 
-  public static User createUserEntityWithoutId() {
-    return User.builder()
-        .username("testuser")
-        .password("plain-password")
-        .email("test@example.com")
-        .role(Role.ROLE_USER)
-        .build();
-  }
-
   public static User createUserEntityWithEncryptedPassword() {
     return User.builder()
         .id(1L)
@@ -114,5 +105,32 @@ public class UserMock {
       createUserEntity(2L, "user2", "user2@example.com"),
       createUserEntity(3L, "user3", "user3@example.com")
     };
+  }
+
+  // Adicione estes métodos ao UserMock
+  public static UserRequestDTO createUserRequestDTOWithSpacesInUsername() {
+    return UserRequestDTO.builder()
+        .username("  normalized  user  ")
+        .email("test@example.com")
+        .password("@Password123")
+        .build();
+  }
+
+  public static User createUserEntityWithNormalizedUsername() {
+    return User.builder()
+        .id(1L)
+        .username("normalizeduser")
+        .email("test@example.com")
+        .password("$2a$10$encryptedPasswordHash")
+        .role(Role.ROLE_USER)
+        .build();
+  }
+
+  public static UserResponseDTO createUserResponseDTOWithNormalizedUsername() {
+    return UserResponseDTO.builder()
+        .id(1L)
+        .username("normalizeduser")
+        .email("test@example.com")
+        .build();
   }
 }

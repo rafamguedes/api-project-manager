@@ -15,8 +15,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc
 @ActiveProfiles("test")
+@AutoConfigureMockMvc
 class RateLimitTest {
 
   private static final Logger log = LoggerFactory.getLogger(RateLimitTest.class);
@@ -46,7 +46,7 @@ class RateLimitTest {
   void shouldBlockRequestsAfterLimit() throws Exception {
     log.info("Testing rate limit blocking after limit");
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 40; i++) {
       MvcResult result =
           mockMvc
               .perform(get(PROJECT_PATH).header("X-Forwarded-For", "192.168.1.200"))
@@ -54,7 +54,7 @@ class RateLimitTest {
               .andReturn();
 
       String remaining = result.getResponse().getHeader("X-Rate-Limit-Remaining");
-      log.info("Request {}/10 - Remaining: {}", i + 1, remaining);
+      log.info("Request {}/40 - Remaining: {}", i + 1, remaining);
     }
 
     log.warn("Next request should be blocked");
