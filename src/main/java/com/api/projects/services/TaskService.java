@@ -13,6 +13,8 @@ import com.api.projects.repositories.ProjectRepository;
 import com.api.projects.repositories.TaskRepository;
 import com.api.projects.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,9 @@ public class TaskService {
   private final ProjectRepository projectRepository;
   private final TaskMapper taskMapper;
 
+  @CacheEvict(
+      value = {"tasks", "task"},
+      allEntries = true)
   public TaskResponseDTO create(TaskRequestDTO request) {
     Project project =
         projectRepository
@@ -44,6 +49,7 @@ public class TaskService {
     return taskMapper.toResponse(savedTask);
   }
 
+  @Cacheable(value = "task", key = "#id")
   public TaskResponseDTO findById(Long id) {
     return taskRepository
         .findById(id)
@@ -51,6 +57,10 @@ public class TaskService {
         .orElseThrow(() -> new NotFoundException(TASK_NOT_FOUND_MESSAGE + id));
   }
 
+  @Cacheable(
+      value = "tasks",
+      key =
+          "{#filter?.page ?: 0, #filter?.size ?: 20, #filter?.sortBy ?: 'id', #filter?.direction ?: 'ASC', #filter?.status, #filter?.priority, #filter?.projectId}")
   public PageResponseDTO<TaskResponseDTO> findByFilter(TaskFilterDTO filter) {
     Pageable pageable =
         PageRequest.of(
@@ -67,6 +77,9 @@ public class TaskService {
     return PageResponseDTO.of(pageResult);
   }
 
+  @CacheEvict(
+      value = {"task", "tasks"},
+      allEntries = true)
   public void updateStatus(Long id, TaskStatusUpdateDTO request) {
     Task existingTask =
         taskRepository
@@ -77,6 +90,9 @@ public class TaskService {
     taskRepository.save(existingTask);
   }
 
+  @CacheEvict(
+      value = {"task", "tasks"},
+      allEntries = true)
   public void updatePriority(Long id, TaskPriorityUpdateDTO request) {
     Task existingTask =
         taskRepository
@@ -87,6 +103,9 @@ public class TaskService {
     taskRepository.save(existingTask);
   }
 
+  @CacheEvict(
+      value = {"task", "tasks"},
+      allEntries = true)
   public void delete(Long id) {
     if (!taskRepository.existsById(id)) {
       throw new NotFoundException(TASK_NOT_FOUND_MESSAGE + id);

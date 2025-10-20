@@ -3,6 +3,7 @@ package com.api.projects.dtos.project;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
@@ -27,4 +28,7 @@ public class ProjectRequestDTO {
   @DateTimeFormat(pattern = "yyyy-MM-dd['T'HH:mm]")
   @Future(message = "End date must be in the future")
   private LocalDateTime endDate;
+
+  @NotNull(message = "Owner ID cannot be null")
+  private Long ownerId;
 }

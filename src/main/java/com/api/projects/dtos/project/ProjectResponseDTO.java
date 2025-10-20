@@ -1,5 +1,6 @@
 package com.api.projects.dtos.project;
 
+import com.api.projects.dtos.user.UserResponseDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
@@ -19,4 +20,5 @@ public class ProjectResponseDTO {
   private LocalDateTime updatedAt;
   private String createdBy;
   private String updatedBy;
+  private UserResponseDTO owner;
 }
