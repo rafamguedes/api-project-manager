@@ -14,6 +14,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -43,22 +44,25 @@ class ProjectControllerTest extends BaseIntegration {
     when(projectService.create(any(ProjectRequestDTO.class))).thenReturn(projectResponseDTO);
 
     // Act & Assert
-    mockMvc
-        .perform(
-            post(PROJECT_BASE_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(projectRequestDTO)))
-        .andExpect(status().isCreated())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.id", is(1)))
-        .andExpect(jsonPath("$.name", is("Integration Test Project")))
-        .andExpect(jsonPath("$.description", is("Project for integration testing")))
-        .andExpect(jsonPath("$.startDate", is("2390-10-17T18:00:00")))
-        .andExpect(jsonPath("$.endDate", is("2390-11-16T18:00:00")))
-        .andExpect(jsonPath("$.createdAt", is("2390-10-17T18:00:00")))
-        .andExpect(jsonPath("$.updatedAt", is("2390-10-17T19:00:00")))
-        .andExpect(jsonPath("$.createdBy", is("testuser")))
-        .andExpect(jsonPath("$.updatedBy", is("testuser")));
+    String responseContent =
+        mockMvc
+            .perform(
+                post(PROJECT_BASE_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(projectRequestDTO)))
+            .andExpect(status().isCreated())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    // Convert response to DTO
+    ProjectResponseDTO responseDto =
+        objectMapper.readValue(responseContent, ProjectResponseDTO.class);
+
+    assertThat(responseDto).isEqualTo(projectResponseDTO);
+    assertThat(responseDto.getId()).isEqualTo(projectResponseDTO.getId());
+    assertThat(responseDto.getName()).isEqualTo(projectResponseDTO.getName());
 
     verify(projectService, times(1)).create(any(ProjectRequestDTO.class));
   }
@@ -107,6 +111,7 @@ class ProjectControllerTest extends BaseIntegration {
         .andExpect(jsonPath("$.currentPage", is(0)))
         .andExpect(jsonPath("$.totalPages", is(1)))
         .andExpect(jsonPath("$.totalElements", is(1)));
+    ;
 
     verify(projectService, times(1)).findByFilter(any());
   }
@@ -174,19 +179,42 @@ class ProjectControllerTest extends BaseIntegration {
     when(projectService.findById(projectId)).thenReturn(projectResponseDTO);
 
     // Act & Assert
-    mockMvc
-        .perform(get(PROJECT_BASE_URL + "/{id}", projectId))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.id", is(1)))
-        .andExpect(jsonPath("$.name", is("Integration Test Project")))
-        .andExpect(jsonPath("$.description", is("Project for integration testing")))
-        .andExpect(jsonPath("$.startDate", is("2390-10-17T18:00:00")))
-        .andExpect(jsonPath("$.endDate", is("2390-11-16T18:00:00")))
-        .andExpect(jsonPath("$.createdAt", is("2390-10-17T18:00:00")))
-        .andExpect(jsonPath("$.updatedAt", is("2390-10-17T19:00:00")))
-        .andExpect(jsonPath("$.createdBy", is("testuser")))
-        .andExpect(jsonPath("$.updatedBy", is("testuser")));
+    String responseContent =
+        mockMvc
+            .perform(get(PROJECT_BASE_URL + "/{id}", projectId))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    // Convert response to DTO
+    ProjectResponseDTO responseDto =
+        objectMapper.readValue(responseContent, ProjectResponseDTO.class);
+
+    // Assert using assertThat
+    assertThat(responseDto).isEqualTo(projectResponseDTO);
+    assertThat(responseDto.getId()).isEqualTo(projectResponseDTO.getId());
+    assertThat(responseDto.getName()).isEqualTo(projectResponseDTO.getName());
+    assertThat(responseDto.getDescription()).isEqualTo(projectResponseDTO.getDescription());
+    assertThat(responseDto.getStartDate()).isEqualTo(projectResponseDTO.getStartDate());
+    assertThat(responseDto.getEndDate()).isEqualTo(projectResponseDTO.getEndDate());
+    assertThat(responseDto.getCreatedAt()).isEqualTo(projectResponseDTO.getCreatedAt());
+    assertThat(responseDto.getUpdatedAt()).isEqualTo(projectResponseDTO.getUpdatedAt());
+    assertThat(responseDto.getCreatedBy()).isEqualTo(projectResponseDTO.getCreatedBy());
+    assertThat(responseDto.getUpdatedBy()).isEqualTo(projectResponseDTO.getUpdatedBy());
+
+    // Verify user data if present
+    if (projectResponseDTO.getOwner() != null) {
+      assertThat(responseDto.getOwner()).isEqualTo(projectResponseDTO.getOwner());
+      assertThat(responseDto.getOwner().getId()).isEqualTo(projectResponseDTO.getOwner().getId());
+      assertThat(responseDto.getOwner().getUsername())
+          .isEqualTo(projectResponseDTO.getOwner().getUsername());
+      assertThat(responseDto.getOwner().getEmail())
+          .isEqualTo(projectResponseDTO.getOwner().getEmail());
+      assertThat(responseDto.getOwner().getRole())
+          .isEqualTo(projectResponseDTO.getOwner().getRole());
+    }
 
     verify(projectService, times(1)).findById(projectId);
   }
@@ -205,7 +233,8 @@ class ProjectControllerTest extends BaseIntegration {
             put(PROJECT_BASE_URL + "/{id}", projectId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(projectRequestDTO)))
-        .andExpect(status().isNoContent());
+        .andExpect(status().isNoContent())
+        .andExpect(content().string("")); // Response body vazio para 204
 
     verify(projectService, times(1)).updateProject(eq(projectId), any());
   }
@@ -216,13 +245,13 @@ class ProjectControllerTest extends BaseIntegration {
   void deleteProjectById_ShouldReturnNoContent_WhenProjectDeleted() throws Exception {
     // Arrange
     Long projectId = 1L;
-
     doNothing().when(projectService).deleteProjectById(projectId);
 
     // Act & Assert
     mockMvc
         .perform(delete(PROJECT_BASE_URL + "/{id}", projectId))
-        .andExpect(status().isNoContent());
+        .andExpect(status().isNoContent())
+        .andExpect(content().string(""));
 
     verify(projectService, times(1)).deleteProjectById(projectId);
   }
@@ -234,7 +263,6 @@ class ProjectControllerTest extends BaseIntegration {
   void deleteProjectsByIds_ShouldReturnNoContent_WhenProjectsDeleted() throws Exception {
     // Arrange
     List<Long> projectIds = List.of(1L, 2L, 3L);
-
     doNothing().when(projectService).deleteProjectsByIds(projectIds);
 
     // Act & Assert
@@ -243,7 +271,8 @@ class ProjectControllerTest extends BaseIntegration {
             post(PROJECT_BASE_URL + "/delete-by-ids")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(projectIds)))
-        .andExpect(status().isNoContent());
+        .andExpect(status().isNoContent())
+        .andExpect(content().string(""));
 
     verify(projectService, times(1)).deleteProjectsByIds(projectIds);
   }

@@ -1,39 +1,43 @@
+app:
+  environment: dev
+
 spring:
-  application:
-    name: projects
   datasource:
-    url: jdbc:postgresql://localhost:5432/projects_db
-    username: postgres
-    password: root
-    driver-class-name: org.postgresql.Driver
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/projects_db}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:root}
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create
-    show-sql: false
+      ddl-auto: ${HIBERNATE_DDL_AUTO:create}
+    show-sql: ${SHOW_SQL:false}
     properties:
       hibernate:
-        format_sql: false
-        jdbc:
-          lob:
-            non_contextual_creation: false
+        format_sql: ${FORMAT_SQL:false}
   security:
     token:
-      secret: secret-jwt-token-key
+      secret: ${JWT_SECRET:secret-jwt-token-key-dev}
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=500,expireAfterAccess=10m
 
 cors:
-  allowed-origins: "http://localhost:5173"
-  allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
-  allowed-headers: "Authorization,Content-Type"
-  exposed-headers: Authorization,Content-Type,X-Total-Count,X-Total-Pages
-  allow-credentials: true
-  max-age: 3600
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  allowed-methods: ${CORS_ALLOWED_METHODS:GET,POST,PUT,DELETE,PATCH,OPTIONS}
+  allowed-headers: ${CORS_ALLOWED_HEADERS:Authorization,Content-Type}
+  exposed-headers: ${CORS_EXPOSED_HEADERS:Authorization,Content-Type,X-Total-Count,X-Total-Pages}
+  allow-credentials: ${CORS_ALLOW_CREDENTIALS:true}
+  max-age: ${CORS_MAX_AGE:3600}
 
 rate-limit:
-  requests: 10
-  duration: 60
+  requests: ${RATE_LIMIT_REQUESTS:10}
+  duration: ${RATE_LIMIT_DURATION:60}
 
 logging:
   level:
-    org.springframework.security: DEBUG
-    com.api.projects: DEBUG
+    org.springframework.security: ${LOG_LEVEL_SECURITY:DEBUG}
+    com.api.projects: ${LOG_LEVEL_APP:DEBUG}
+    org.hibernate.SQL: ${LOG_LEVEL_HIBERNATE_SQL:false}
+    org.hibernate.type: ${LOG_LEVEL_HIBERNATE_TYPE:false}
+    org.springframework.web: ${LOG_LEVEL_WEB:DEBUG}
+    org.springframework.cache: ${LOG_LEVEL_CACHE:TRACE}

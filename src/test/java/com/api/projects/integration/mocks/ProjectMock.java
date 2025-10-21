@@ -3,6 +3,7 @@ package com.api.projects.integration.mocks;
 import com.api.projects.dtos.pagination.PageResponseDTO;
 import com.api.projects.dtos.project.ProjectRequestDTO;
 import com.api.projects.dtos.project.ProjectResponseDTO;
+import com.api.projects.unit.mocks.UserMock;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,6 +16,7 @@ public class ProjectMock {
         .description("Project for integration testing")
         .startDate(LocalDateTime.parse("2390-10-17T18:00:00"))
         .endDate(LocalDateTime.parse("2390-10-17T18:00:00").plusDays(30))
+        .ownerId(1L)
         .build();
   }
 
@@ -29,6 +31,7 @@ public class ProjectMock {
         .updatedAt(LocalDateTime.parse("2390-10-17T18:00:00").plusHours(1))
         .createdBy("testuser")
         .updatedBy("testuser")
+        .owner(UserMock.createUserResponseDTO())
         .build();
   }
 
