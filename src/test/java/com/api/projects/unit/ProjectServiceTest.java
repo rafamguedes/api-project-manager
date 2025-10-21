@@ -6,10 +6,13 @@ import com.api.projects.dtos.project.ProjectRequestDTO;
 import com.api.projects.dtos.project.ProjectResponseDTO;
 import com.api.projects.dtos.project.ProjectUpdateRequestDTO;
 import com.api.projects.entities.Project;
+import com.api.projects.entities.User;
 import com.api.projects.mappers.ProjectMapper;
 import com.api.projects.repositories.ProjectRepository;
+import com.api.projects.repositories.UserRepository;
 import com.api.projects.services.ProjectService;
 import com.api.projects.unit.mocks.ProjectMock;
+import com.api.projects.unit.mocks.UserMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +38,8 @@ class ProjectServiceTest {
 
   @Mock private ProjectRepository projectRepository;
 
+  @Mock private UserRepository userRepository;
+
   @Mock private ProjectMapper projectMapper;
 
   @InjectMocks private ProjectService projectService;
@@ -44,6 +49,7 @@ class ProjectServiceTest {
   private ProjectResponseDTO projectResponseDTO;
   private Project savedProject;
   private ProjectUpdateRequestDTO projectUpdateRequestDTO;
+  private User userEntity;
 
   @BeforeEach
   void setUp() {
@@ -52,12 +58,15 @@ class ProjectServiceTest {
     projectResponseDTO = ProjectMock.createProjectResponseDTO();
     savedProject = ProjectMock.createProjectEntity();
     projectUpdateRequestDTO = ProjectMock.createProjectUpdateRequestDTO();
+    userEntity = UserMock.createUserEntity();
   }
 
   @Test
   @DisplayName("Should create project successfully")
   void create_ShouldCreateProject_WhenValidRequest() {
     // Arrange
+    when(userRepository.findById(projectRequestDTO.getOwnerId()))
+        .thenReturn(Optional.of(userEntity));
     when(projectMapper.toEntity(projectRequestDTO)).thenReturn(project);
     when(projectRepository.save(project)).thenReturn(savedProject);
     when(projectMapper.toResponse(savedProject)).thenReturn(projectResponseDTO);
@@ -71,6 +80,7 @@ class ProjectServiceTest {
     assertEquals(projectResponseDTO.getName(), result.getName());
     assertEquals(projectResponseDTO.getDescription(), result.getDescription());
 
+    verify(userRepository, times(1)).findById(projectRequestDTO.getOwnerId());
     verify(projectMapper, times(1)).toEntity(projectRequestDTO);
     verify(projectRepository, times(1)).save(project);
     verify(projectMapper, times(1)).toResponse(savedProject);

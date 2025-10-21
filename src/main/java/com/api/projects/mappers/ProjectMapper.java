@@ -15,5 +15,6 @@ public interface ProjectMapper {
   @Mapping(target = "tasks", ignore = true)
   Project toEntity(ProjectRequestDTO projectRequestDTO);
 
+  @Mapping(target = "owner", source = "owner")
   ProjectResponseDTO toResponse(Project project);
 }

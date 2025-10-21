@@ -6,9 +6,11 @@ import com.api.projects.dtos.project.ProjectRequestDTO;
 import com.api.projects.dtos.project.ProjectResponseDTO;
 import com.api.projects.dtos.project.ProjectUpdateRequestDTO;
 import com.api.projects.entities.Project;
+import com.api.projects.entities.User;
 import com.api.projects.mappers.ProjectMapper;
 import com.api.projects.repositories.ProjectRepository;
 import com.api.projects.exceptions.NotFoundException;
+import com.api.projects.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -28,18 +30,29 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ProjectService {
 
+  private static final String USER_NOT_FOUND_MESSAGE = "User not found with id: ";
   private static final String PROJECT_NOT_FOUND_MESSAGE = "Project not found with id: ";
 
   private static final String PROJECT_CACHE = "project";
   private static final String PROJECTS_CACHE = "projects";
 
   private final ProjectRepository projectRepository;
+  private final UserRepository userRepository;
   private final ProjectMapper projectMapper;
 
   @CacheEvict(value = PROJECTS_CACHE, allEntries = true)
   public ProjectResponseDTO create(ProjectRequestDTO request) {
     log.debug("Creating new project and evicting projects cache");
+
+    User user =
+        userRepository
+            .findById(request.getOwnerId())
+            .orElseThrow(
+                () -> new NotFoundException(USER_NOT_FOUND_MESSAGE + request.getOwnerId()));
+
     Project project = projectMapper.toEntity(request);
+    project.setOwner(user);
+
     Project savedProject = projectRepository.save(project);
     return projectMapper.toResponse(savedProject);
   }

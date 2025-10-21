@@ -46,7 +46,7 @@ public class User implements UserDetails {
   private Role role;
 
   @OneToMany(mappedBy = "owner")
-  private List<Project> ownedProjects;
+  private List<Project> ownerProjects;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {

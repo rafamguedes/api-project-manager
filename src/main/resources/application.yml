@@ -8,7 +8,7 @@ spring:
     password: ${DATABASE_PASSWORD:root}
   jpa:
     hibernate:
-      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
+      ddl-auto: ${HIBERNATE_DDL_AUTO:create}
     show-sql: ${SHOW_SQL:false}
     properties:
       hibernate:
