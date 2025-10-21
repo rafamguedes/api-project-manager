@@ -14,6 +14,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -43,22 +44,25 @@ class ProjectControllerTest extends BaseIntegration {
     when(projectService.create(any(ProjectRequestDTO.class))).thenReturn(projectResponseDTO);
 
     // Act & Assert
-    mockMvc
-        .perform(
-            post(PROJECT_BASE_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(projectRequestDTO)))
-        .andExpect(status().isCreated())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.id", is(1)))
-        .andExpect(jsonPath("$.name", is("Integration Test Project")))
-        .andExpect(jsonPath("$.description", is("Project for integration testing")))
-        .andExpect(jsonPath("$.startDate", is("2390-10-17T18:00:00")))
-        .andExpect(jsonPath("$.endDate", is("2390-11-16T18:00:00")))
-        .andExpect(jsonPath("$.createdAt", is("2390-10-17T18:00:00")))
-        .andExpect(jsonPath("$.updatedAt", is("2390-10-17T19:00:00")))
-        .andExpect(jsonPath("$.createdBy", is("testuser")))
-        .andExpect(jsonPath("$.updatedBy", is("testuser")));
+    String responseContent =
+        mockMvc
+            .perform(
+                post(PROJECT_BASE_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(projectRequestDTO)))
+            .andExpect(status().isCreated())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    // Convert response to DTO
+    ProjectResponseDTO responseDto =
+        objectMapper.readValue(responseContent, ProjectResponseDTO.class);
+
+    assertThat(responseDto).isEqualTo(projectResponseDTO);
+    assertThat(responseDto.getId()).isEqualTo(projectResponseDTO.getId());
+    assertThat(responseDto.getName()).isEqualTo(projectResponseDTO.getName());
 
     verify(projectService, times(1)).create(any(ProjectRequestDTO.class));
   }
@@ -107,6 +111,7 @@ class ProjectControllerTest extends BaseIntegration {
         .andExpect(jsonPath("$.currentPage", is(0)))
         .andExpect(jsonPath("$.totalPages", is(1)))
         .andExpect(jsonPath("$.totalElements", is(1)));
+    ;
 
     verify(projectService, times(1)).findByFilter(any());
   }

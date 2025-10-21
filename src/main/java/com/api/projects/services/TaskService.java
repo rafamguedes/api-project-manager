@@ -13,28 +13,33 @@ import com.api.projects.repositories.ProjectRepository;
 import com.api.projects.repositories.TaskRepository;
 import com.api.projects.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TaskService {
   private static final String PROJECT_NOT_FOUND_MESSAGE = "Project not found by id: ";
   private static final String TASK_NOT_FOUND_MESSAGE = "Task not found by id: ";
 
+  private static final String TASK_CACHE = "task";
+  private static final String TASKS_CACHE = "tasks";
+
   private final TaskRepository taskRepository;
   private final ProjectRepository projectRepository;
   private final TaskMapper taskMapper;
 
-  @CacheEvict(
-      value = {"tasks", "task"},
-      allEntries = true)
+  @CacheEvict(value = TASKS_CACHE, allEntries = true)
   public TaskResponseDTO create(TaskRequestDTO request) {
+    log.info("Creating new task and evicting tasks cache");
     Project project =
         projectRepository
             .findById(request.getProjectId())
@@ -45,12 +50,12 @@ public class TaskService {
     task.setProject(project);
 
     Task savedTask = taskRepository.save(task);
-
     return taskMapper.toResponse(savedTask);
   }
 
-  @Cacheable(value = "task", key = "#id")
+  @Cacheable(value = TASK_CACHE, key = "#id")
   public TaskResponseDTO findById(Long id) {
+    log.info("Fetching task by id {} from database or cache", id);
     return taskRepository
         .findById(id)
         .map(taskMapper::toResponse)
@@ -58,10 +63,11 @@ public class TaskService {
   }
 
   @Cacheable(
-      value = "tasks",
+      value = TASKS_CACHE,
       key =
-          "{#filter?.page ?: 0, #filter?.size ?: 20, #filter?.sortBy ?: 'id', #filter?.direction ?: 'ASC', #filter?.status, #filter?.priority, #filter?.projectId}")
+          "T(java.util.Objects).hash(#filter.page, #filter.size, #filter.sortBy, #filter.direction, #filter.status, #filter.priority, #filter.projectId)")
   public PageResponseDTO<TaskResponseDTO> findByFilter(TaskFilterDTO filter) {
+    log.info("Fetching tasks from database with filter: {}", filter);
     Pageable pageable =
         PageRequest.of(
             filter.getPage(),
@@ -77,10 +83,13 @@ public class TaskService {
     return PageResponseDTO.of(pageResult);
   }
 
-  @CacheEvict(
-      value = {"task", "tasks"},
-      allEntries = true)
+  @Caching(
+      evict = {
+        @CacheEvict(value = TASK_CACHE, key = "#id"),
+        @CacheEvict(value = TASKS_CACHE, allEntries = true)
+      })
   public void updateStatus(Long id, TaskStatusUpdateDTO request) {
+    log.info("Updating status of task with id: {}", id);
     Task existingTask =
         taskRepository
             .findById(id)
@@ -90,10 +99,13 @@ public class TaskService {
     taskRepository.save(existingTask);
   }
 
-  @CacheEvict(
-      value = {"task", "tasks"},
-      allEntries = true)
+  @Caching(
+      evict = {
+        @CacheEvict(value = TASK_CACHE, key = "#id"),
+        @CacheEvict(value = TASKS_CACHE, allEntries = true)
+      })
   public void updatePriority(Long id, TaskPriorityUpdateDTO request) {
+    log.info("Updating priority of task with id: {}", id);
     Task existingTask =
         taskRepository
             .findById(id)
@@ -103,14 +115,16 @@ public class TaskService {
     taskRepository.save(existingTask);
   }
 
-  @CacheEvict(
-      value = {"task", "tasks"},
-      allEntries = true)
+  @Caching(
+      evict = {
+        @CacheEvict(value = TASK_CACHE, key = "#id"),
+        @CacheEvict(value = TASKS_CACHE, allEntries = true)
+      })
   public void delete(Long id) {
+    log.info("Deleting task with id: {}", id);
     if (!taskRepository.existsById(id)) {
       throw new NotFoundException(TASK_NOT_FOUND_MESSAGE + id);
     }
-
     taskRepository.deleteById(id);
   }
 }
